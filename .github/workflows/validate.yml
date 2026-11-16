@@ -1,0 +1,45 @@
+---
+name: Validate Ansible
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ansible-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: YAML, lint, and syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install validation dependencies
+        run: pip install --requirement requirements-dev.txt
+
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install --requirements-file requirements.yml
+
+      - name: Run YAML lint
+        run: yamllint .
+
+      - name: Run Ansible lint
+        run: ansible-lint
+
+      - name: Run playbook syntax check
+        run: ansible-playbook --inventory inventory/lab/hosts.yml site.yml --syntax-check
+

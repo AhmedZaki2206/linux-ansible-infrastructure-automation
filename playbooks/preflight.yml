@@ -1,0 +1,40 @@
+---
+- name: Verify safe management access before configuration
+  hosts: lab_servers
+  gather_facts: false
+  any_errors_fatal: true
+  tags: [always, preflight]
+  tasks:
+    - name: Wait for SSH connectivity using the managed key
+      ansible.builtin.wait_for_connection:
+        timeout: 30
+
+    - name: Verify Ansible can execute Python remotely
+      ansible.builtin.ping:
+
+    - name: Verify privilege escalation without a password prompt
+      ansible.builtin.command: /usr/bin/id -u
+      become: true
+      changed_when: false
+      register: preflight_root_id
+
+    - name: Assert safe privileged access is available
+      ansible.builtin.assert:
+        that:
+          - preflight_root_id.stdout == "0"
+        fail_msg: Refusing to harden SSH or firewall because passwordless sudo verification failed.
+
+    - name: Read managed authorized keys
+      ansible.builtin.slurp:
+        src: /home/{{ managed_admin_user }}/.ssh/authorized_keys
+      register: preflight_authorized_keys
+      no_log: true
+
+    - name: Assert controller public key is installed before SSH hardening
+      ansible.builtin.assert:
+        that:
+          - lookup('ansible.builtin.file', managed_admin_public_key_file).strip() in
+            (preflight_authorized_keys.content | b64decode)
+        fail_msg: Refusing to disable password authentication because the controller key is missing.
+      no_log: true
+

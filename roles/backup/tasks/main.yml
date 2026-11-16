@@ -1,0 +1,25 @@
+---
+- name: Create protected backup directory
+  ansible.builtin.file:
+    path: "{{ backup_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Deploy backup script
+  ansible.builtin.template:
+    src: backup.sh.j2
+    dest: /usr/local/sbin/ansible-lab-backup
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Deploy restore script
+  ansible.builtin.template:
+    src: restore.sh.j2
+    dest: /usr/local/sbin/ansible-lab-restore
+    owner: root
+    group: root
+    mode: "0750"
+

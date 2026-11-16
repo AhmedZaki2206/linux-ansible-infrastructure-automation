@@ -1,0 +1,41 @@
+---
+- name: Set default incoming firewall policy
+  community.general.ufw:
+    direction: incoming
+    policy: "{{ ufw_default_incoming_policy }}"
+
+- name: Set default outgoing firewall policy
+  community.general.ufw:
+    direction: outgoing
+    policy: "{{ ufw_default_outgoing_policy }}"
+
+- name: Preserve SSH from the private controller network
+  community.general.ufw:
+    rule: allow
+    direction: in
+    proto: tcp
+    from_ip: "{{ controller_cidr }}"
+    to_port: "{{ ssh_port }}"
+    comment: Ansible controller SSH
+
+- name: Allow private lab HTTP to web servers
+  community.general.ufw:
+    rule: allow
+    direction: in
+    proto: tcp
+    from_ip: "{{ nginx_allowed_cidr }}"
+    to_port: "{{ nginx_listen_port }}"
+    comment: Private lab HTTP
+  when: inventory_hostname in groups['web_servers']
+
+- name: Enable UFW only after allow rules exist
+  community.general.ufw:
+    state: enabled
+    logging: low
+
+- name: Verify UFW status
+  ansible.builtin.command: /usr/sbin/ufw status
+  register: ufw_status
+  changed_when: false
+  failed_when: "'Status: active' not in ufw_status.stdout"
+

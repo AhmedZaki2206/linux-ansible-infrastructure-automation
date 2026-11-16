@@ -1,0 +1,10 @@
+.vagrant/
+.generated/
+.venv/
+__pycache__/
+*.retry
+*.log
+.env
+vault-password*
+artifacts/
+

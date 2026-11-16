@@ -1,0 +1,8 @@
+[Unit]
+Description=Ansible lab health check
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c '/usr/local/sbin/ansible-lab-health >> {{ healthcheck_log }} 2>&1'
+

@@ -1,0 +1,11 @@
+---
+- name: Validate lightweight container SSH connectivity
+  hosts: container_servers
+  gather_facts: true
+  tasks:
+    - name: Verify Ansible Python execution
+      ansible.builtin.ping:
+    - name: Display container limitation reminder
+      ansible.builtin.debug:
+        msg: Containers validate SSH and Ansible connectivity only; they do not reproduce systemd or UFW behavior.
+

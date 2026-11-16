@@ -1,0 +1,21 @@
+---
+services:
+  web01:
+    build: .
+    hostname: web01
+    ports: ["127.0.0.1:2221:22"]
+    volumes:
+      - ${HOME}/.ssh:/run/controller-key:ro
+  app01:
+    build: .
+    hostname: app01
+    ports: ["127.0.0.1:2222:22"]
+    volumes:
+      - ${HOME}/.ssh:/run/controller-key:ro
+  ops01:
+    build: .
+    hostname: ops01
+    ports: ["127.0.0.1:2223:22"]
+    volumes:
+      - ${HOME}/.ssh:/run/controller-key:ro
+

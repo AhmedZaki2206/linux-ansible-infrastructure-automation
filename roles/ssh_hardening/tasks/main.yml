@@ -1,0 +1,54 @@
+---
+- name: Ensure controller connectivity rule exists before SSH changes
+  community.general.ufw:
+    rule: allow
+    direction: in
+    proto: tcp
+    from_ip: "{{ controller_cidr }}"
+    to_port: "{{ ssh_port }}"
+    comment: Ansible controller SSH
+
+- name: Check managed authorized_keys before disabling passwords
+  ansible.builtin.stat:
+    path: /home/{{ managed_admin_user }}/.ssh/authorized_keys
+  register: ssh_authorized_keys
+
+- name: Refuse unsafe SSH hardening
+  ansible.builtin.assert:
+    that:
+      - ssh_authorized_keys.stat.exists
+      - ssh_authorized_keys.stat.size | int > 40
+    fail_msg: Refusing SSH hardening because a usable authorized_keys file was not found.
+
+- name: Back up current SSH daemon configuration
+  ansible.builtin.copy:
+    src: /etc/ssh/sshd_config
+    dest: /etc/ssh/sshd_config.pre-ansible
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+
+- name: Install validated SSH hardening drop-in
+  ansible.builtin.template:
+    src: 90-ansible-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/90-ansible-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Reload ssh
+
+- name: Flush SSH handler while the current connection remains open
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify SSH daemon remains active after hardening
+  ansible.builtin.service_facts:
+
+- name: Assert SSH service is running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services['ssh.service'].state == 'running'
+    fail_msg: SSH is not running. Use the Vagrant console and restore /etc/ssh/sshd_config.pre-ansible.
+

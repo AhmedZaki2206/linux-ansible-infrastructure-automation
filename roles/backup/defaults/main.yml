@@ -1,0 +1,9 @@
+---
+backup_paths:
+  - /etc/ssh
+  - /etc/ufw
+  - /etc/logrotate.d
+backup_web_paths:
+  - /etc/nginx
+  - /var/www/html
+

@@ -1,0 +1,6 @@
+---
+server_purpose: web
+nginx_server_name: _
+nginx_listen_port: 80
+nginx_allowed_cidr: 192.168.56.0/24
+
