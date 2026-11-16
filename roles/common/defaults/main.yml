@@ -1,0 +1,4 @@
+---
+common_timezone: Etc/UTC
+common_upgrade_packages: false
+

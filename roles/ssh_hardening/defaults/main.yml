@@ -1,0 +1,4 @@
+---
+ssh_hardening_allow_groups:
+  - "{{ managed_admin_group }}"
+

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+status=0
+printf 'host=%s time=%s\n' "$(hostname)" "$(date --iso-8601=seconds)"
+printf 'uptime_seconds=%s\n' "$(cut -d. -f1 /proc/uptime)"
+printf 'load=%s\n' "$(cut -d' ' -f1-3 /proc/loadavg)"
+printf 'root_disk_percent=%s\n' "$(df --output=pcent / | tail -1 | tr -dc '0-9')"
+printf 'memory_available_kb=%s\n' "$(awk '/MemAvailable/ {print $2}' /proc/meminfo)"
+
+systemctl is-active --quiet ssh || { echo 'ssh_service=failed'; status=1; }
+{% if inventory_hostname in groups['web_servers'] %}
+systemctl is-active --quiet nginx || { echo 'nginx_service=failed'; status=1; }
+curl --fail --silent --max-time 3 http://127.0.0.1:{{ nginx_listen_port }}/healthz >/dev/null || {
+  echo 'nginx_health=failed'
+  status=1
+}
+{% endif %}
+exit "${status}"
+

@@ -1,0 +1,27 @@
+---
+project_name: linux-ansible-infrastructure-automation
+lab_network_cidr: 192.168.56.0/24
+controller_cidr: 192.168.56.0/24
+managed_admin_user: ansible
+managed_admin_group: ansible-admins
+managed_admin_public_key_file: "{{ lookup('env', 'HOME') }}/.ssh/ansible_lab_ed25519.pub"
+common_packages:
+  - ca-certificates
+  - curl
+  - git
+  - jq
+  - logrotate
+  - rsync
+  - ufw
+  - vim
+  - unattended-upgrades
+ssh_port: 22
+ssh_password_authentication: "no"
+ssh_permit_root_login: "no"
+ssh_max_auth_tries: 3
+ufw_default_incoming_policy: deny
+ufw_default_outgoing_policy: allow
+backup_root: /var/backups/ansible-lab
+backup_retention_days: 7
+healthcheck_log: /var/log/ansible-lab-health.log
+

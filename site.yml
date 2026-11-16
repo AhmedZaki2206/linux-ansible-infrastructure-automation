@@ -1,0 +1,28 @@
+---
+- name: Import management access safety checks
+  ansible.builtin.import_playbook: playbooks/preflight.yml
+
+- name: Apply Linux baseline to all lab servers
+  hosts: lab_servers
+  become: true
+  roles:
+    - role: common
+      tags: [common]
+    - role: users
+      tags: [users]
+    - role: ssh_hardening
+      tags: [ssh, security]
+    - role: firewall
+      tags: [firewall, security]
+    - role: logging
+      tags: [logging]
+    - role: backup
+      tags: [backup]
+
+- name: Configure the web server role
+  hosts: web_servers
+  become: true
+  roles:
+    - role: nginx
+      tags: [nginx, web]
+

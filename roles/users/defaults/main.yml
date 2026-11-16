@@ -1,0 +1,8 @@
+---
+users_managed_users:
+  - name: "{{ managed_admin_user }}"
+    groups:
+      - "{{ managed_admin_group }}"
+    shell: /bin/bash
+    public_key_file: "{{ managed_admin_public_key_file }}"
+

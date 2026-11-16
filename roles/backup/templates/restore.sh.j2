@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+archive=${1:-}
+destination=${2:-/tmp/ansible-lab-restore}
+if [[ -z "${archive}" || ! -f "${archive}" ]]; then
+  echo "Usage: $0 <archive.tar.gz> [safe-destination]" >&2
+  exit 2
+fi
+if [[ "${destination}" == "/" ]]; then
+  echo "Refusing to restore directly over /. Restore to a staging directory and review first." >&2
+  exit 3
+fi
+checksum="${archive}.sha256"
+[[ -f "${checksum}" ]] || { echo "Missing checksum: ${checksum}" >&2; exit 4; }
+(cd "$(dirname "${archive}")" && sha256sum --check "$(basename "${checksum}")")
+mkdir -p "${destination}"
+tar --extract --gzip --file "${archive}" --directory "${destination}"
+find "${destination}" -maxdepth 3 -type f -print
+echo "Restore staged successfully. Review files; no live configuration was overwritten."
+

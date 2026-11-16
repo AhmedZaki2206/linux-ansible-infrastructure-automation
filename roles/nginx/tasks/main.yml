@@ -1,0 +1,55 @@
+---
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Deploy Nginx site configuration
+  ansible.builtin.template:
+    src: ansible-lab.conf.j2
+    dest: /etc/nginx/sites-available/ansible-lab.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Validate and reload nginx
+
+- name: Enable Ansible lab site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/ansible-lab.conf
+    dest: /etc/nginx/sites-enabled/ansible-lab.conf
+    state: link
+  notify: Validate and reload nginx
+
+- name: Disable default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Validate and reload nginx
+
+- name: Deploy portfolio landing page
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start Nginx
+  ansible.builtin.systemd_service:
+    name: nginx
+    enabled: true
+    state: started
+
+- name: Flush Nginx configuration handler
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify local Nginx health endpoint
+  ansible.builtin.uri:
+    url: http://127.0.0.1:{{ nginx_listen_port }}/healthz
+    status_code: 200
+    return_content: true
+  register: nginx_health
+  retries: 3
+  delay: 2
+  until: nginx_health.status == 200
+

@@ -1,0 +1,36 @@
+---
+- name: Create managed administrator group
+  ansible.builtin.group:
+    name: "{{ managed_admin_group }}"
+    state: present
+
+- name: Create managed users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups | join(',') }}"
+    append: true
+    shell: "{{ item.shell }}"
+    create_home: true
+    password_lock: true
+    state: present
+  loop: "{{ users_managed_users }}"
+  no_log: true
+
+- name: Install managed SSH public keys
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ lookup('ansible.builtin.file', item.public_key_file) }}"
+    state: present
+    exclusive: false
+  loop: "{{ users_managed_users }}"
+  no_log: true
+
+- name: Install least-privilege lab sudo policy
+  ansible.builtin.template:
+    src: ansible-admins-sudoers.j2
+    dest: /etc/sudoers.d/90-ansible-lab
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+

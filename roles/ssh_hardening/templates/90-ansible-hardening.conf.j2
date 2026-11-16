@@ -1,0 +1,12 @@
+# Managed by Ansible. Validated with sshd -t before installation.
+Port {{ ssh_port }}
+PermitRootLogin {{ ssh_permit_root_login }}
+PasswordAuthentication {{ ssh_password_authentication }}
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+MaxAuthTries {{ ssh_max_auth_tries }}
+X11Forwarding no
+AllowGroups {{ ssh_hardening_allow_groups | join(' ') }}
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
