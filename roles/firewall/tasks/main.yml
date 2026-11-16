@@ -35,7 +35,7 @@
 
 - name: Verify UFW status
   ansible.builtin.command: /usr/sbin/ufw status
-  register: ufw_status
+  register: firewall_ufw_status
   changed_when: false
-  failed_when: "'Status: active' not in ufw_status.stdout"
+  failed_when: "'Status: active' not in firewall_ufw_status.stdout"
 

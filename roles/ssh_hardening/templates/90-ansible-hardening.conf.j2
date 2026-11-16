@@ -6,7 +6,7 @@ KbdInteractiveAuthentication no
 PubkeyAuthentication yes
 MaxAuthTries {{ ssh_max_auth_tries }}
 X11Forwarding no
-AllowGroups {{ ssh_allow_groups | join(' ') }}
+AllowGroups {{ ssh_hardening_allow_groups | join(' ') }}
 ClientAliveInterval 300
 ClientAliveCountMax 2
 

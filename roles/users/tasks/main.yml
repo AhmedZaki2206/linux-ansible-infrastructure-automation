@@ -13,7 +13,7 @@
     create_home: true
     password_lock: true
     state: present
-  loop: "{{ managed_users }}"
+  loop: "{{ users_managed_users }}"
   no_log: true
 
 - name: Install managed SSH public keys
@@ -22,7 +22,7 @@
     key: "{{ lookup('ansible.builtin.file', item.public_key_file) }}"
     state: present
     exclusive: false
-  loop: "{{ managed_users }}"
+  loop: "{{ users_managed_users }}"
   no_log: true
 
 - name: Install least-privilege lab sudo policy

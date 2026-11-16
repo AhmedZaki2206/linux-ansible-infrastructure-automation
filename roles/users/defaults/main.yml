@@ -1,5 +1,5 @@
 ---
-managed_users:
+users_managed_users:
   - name: "{{ managed_admin_user }}"
     groups:
       - "{{ managed_admin_group }}"

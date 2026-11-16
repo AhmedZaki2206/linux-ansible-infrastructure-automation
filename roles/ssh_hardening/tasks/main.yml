@@ -11,13 +11,13 @@
 - name: Check managed authorized_keys before disabling passwords
   ansible.builtin.stat:
     path: /home/{{ managed_admin_user }}/.ssh/authorized_keys
-  register: ssh_authorized_keys
+  register: ssh_hardening_authorized_keys
 
 - name: Refuse unsafe SSH hardening
   ansible.builtin.assert:
     that:
-      - ssh_authorized_keys.stat.exists
-      - ssh_authorized_keys.stat.size | int > 40
+      - ssh_hardening_authorized_keys.stat.exists
+      - ssh_hardening_authorized_keys.stat.size | int > 40
     fail_msg: Refusing SSH hardening because a usable authorized_keys file was not found.
 
 - name: Back up current SSH daemon configuration
